@@ -13,7 +13,7 @@ unsigned int VAO;
 
 void on_ready() {
 	glfwSetInputMode(engine.main_window.glfw_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetWindowSize(engine.main_window.glfw_window, 1280, 720);
+	glfwSetWindowSize(engine.main_window.glfw_window, engine.main_window.width, engine.main_window.height);
 
 	main_shader.init_shader_program();
 	main_shader.attach_shader("FRAGMENT", "shaders/f_tracer.glsl");
@@ -38,12 +38,22 @@ void on_ready() {
 	
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	
+	main_shader.execute();
+	main_shader.set_uniform("resolution", glm::vec2(engine.main_window.width, engine.main_window.height));
+	main_shader.set_uniform("near", 0.1f);
+	main_shader.set_uniform("far", 100.0f);
 }
 void process(float delta) {
-	main_shader.execute();
+	main_shader.set_uniform("fov", glm::radians((fabsf(sin(glfwGetTime() / 20.0)) * 160.0f) + 1.0f));
+	std::cout << (fabsf(sin(glfwGetTime() / 20.0)) * 160.0f) + 1.0f << std::endl;
 
-	main_shader.set_uniform("u_time", (float)glfwGetTime());
-
+	main_shader.set_uniform("time", (float)glfwGetTime());
+	
+	main_shader.set_uniform("camera_pos", glm::vec3());
+	main_shader.set_uniform("camera_look_dir", glm::vec3(0, 0, -1));
+	//main_shader.set_uniform("camera_look_dir", glm::vec3(sin(glfwGetTime()), 0.0, cos(glfwGetTime())));
+	
 	glBindVertexArray(VAO);	
 	glDrawArrays(GL_TRIANGLES, 0, 18);
 

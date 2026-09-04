@@ -28,6 +28,8 @@ public:
 	void compute_execute(unsigned int wgx, unsigned int wgy, unsigned int wgz);
 	
 	void set_uniform(std::string name, glm::mat4 var);
+	void set_uniform(std::string name, glm::vec3 var);
+	void set_uniform(std::string name, glm::vec2 var);
 	void set_uniform(std::string name, float var);
 	void set_uniform(std::string name, int var); 
 };

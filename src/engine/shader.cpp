@@ -106,6 +106,12 @@ void Shader::compute_execute(unsigned int wgx, unsigned int wgy, unsigned int wg
 void Shader::set_uniform(std::string name, glm::mat4 var){ 
 	glUniformMatrix4fv(glGetUniformLocation(program, name.c_str()), 1, GL_FALSE, glm::value_ptr(var));
 }
+void Shader::set_uniform(std::string name, glm::vec3 var){ 
+	glUniform3f(glGetUniformLocation(program, name.c_str()), var.x, var.y, var.z);
+}
+void Shader::set_uniform(std::string name, glm::vec2 var){ 
+	glUniform2f(glGetUniformLocation(program, name.c_str()), var.x, var.y);
+}
 void Shader::set_uniform(std::string name, float var){ 
 	glUniform1f(glGetUniformLocation(program, name.c_str()), var); 
 }
