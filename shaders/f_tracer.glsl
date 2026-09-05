@@ -27,5 +27,9 @@ void main() {
 	
 	vec3 ray_dir = normalize(right * pix.x * fov_half_tan + up * pix.y * fov_half_tan + nlook_dir);
 
-	out_color = vec4(dot(ray_dir, vec3(0, 0, -1)), 1.0, 1.0, 1.0);
+	float horizon_color = (dot(ray_dir, vec3(0, 1, 0)) + 1.0) / 2.5;
+	if (dot(ray_dir, vec3(0, 1, 0)) > 0.0) {
+		out_color = vec4(horizon_color + 0.2, 1.0, 1.0, 1.0);
+	}
+	else {out_color = vec4(0,0,0,1);}
 }
