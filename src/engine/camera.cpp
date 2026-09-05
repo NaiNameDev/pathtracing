@@ -5,16 +5,20 @@ Camera::Camera() {
 	rotation = glm::vec3(0, 0, 0);
 
 	forward = glm::vec3(0, 0, -1);
+	
+	old_mouse_pos = glm::vec2(0.0f, 0.0f);
 }
 
 glm::vec3 Camera::get_look_dir() {
 	return glm::vec3(glm::vec4(forward, 1.0f) * glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z));
 }
 
-void Camera::mouse_controll(glm::vec2 velocity) {
-	rotation.x += velocity.y * 0.003f;
-	rotation.y += velocity.x * 0.003f;
+void Camera::mouse_controll(glm::vec2 mouse_pos) {
+	rotation.x += (old_mouse_pos.y - mouse_pos.y) * -0.003f;
+	rotation.y += (old_mouse_pos.x - mouse_pos.x) * -0.003f;
 	rotation.x = glm::clamp(rotation.x, glm::radians(-89.0f), glm::radians(89.0f));
+
+	old_mouse_pos = mouse_pos;
 }
 void Camera::camera_controll(float delta, Window& window) {
 	delta *= 3.0f;

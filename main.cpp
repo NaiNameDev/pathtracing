@@ -54,8 +54,7 @@ void process(float delta) {
 	
 	main_shader.set_uniform("camera_pos", glm::vec3());
 	main_shader.set_uniform("camera_look_dir", main_camera.get_look_dir());
-	//main_shader.set_uniform("camera_look_dir", glm::vec3(sin(glfwGetTime()), 0.0, cos(glfwGetTime())));
-	
+
 	glBindVertexArray(VAO);	
 	glDrawArrays(GL_TRIANGLES, 0, 18);
 

@@ -1,6 +1,7 @@
 #version 460 core
 
-#define MAX_DEPTH 50
+#define MAX_DEPTH 4
+#define SPP 12
 
 out vec4 out_color;
 
@@ -13,6 +14,26 @@ uniform float far;
 
 uniform vec3 camera_pos;
 uniform vec3 camera_look_dir;
+
+vec3 random_reflection(vec3 normal, int seed) {
+	return vec3(1.0);
+}
+
+mat3 get_hit_point_noraml_color(vec3 origin, vec3 dir) {
+	return mat3(1.0);
+}
+
+vec3 trace(vec3 origin, vec3 dir, int seed) {
+	mat3 pnc = get_hit_point_noraml_color(origin, dir);
+	vec3 color_sum = pnc[0];
+
+	for (int i = 0; i < MAX_DEPTH; i++) {
+		pnc = get_dir_pnc(pnc[2], random_reflection(pnc[1], seed + i));
+		color_sum *= pnc[0];
+	}
+
+	return color_sum;
+}
 
 void main() {
 	vec3 nlook_dir = normalize(camera_look_dir);
@@ -27,9 +48,10 @@ void main() {
 	
 	vec3 ray_dir = normalize(right * pix.x * fov_half_tan + up * pix.y * fov_half_tan + nlook_dir);
 
-	float horizon_color = (dot(ray_dir, vec3(0, 1, 0)) + 1.0) / 2.5;
-	if (dot(ray_dir, vec3(0, 1, 0)) > 0.0) {
-		out_color = vec4(horizon_color + 0.2, 1.0, 1.0, 1.0);
+	vec3 color_sum = vec3(0.0);
+	for (int i = 0; i < SPP; i++) {
+		color_sum += trace(camera_pos, ray_dir, i + int(u_time));
 	}
-	else {out_color = vec4(0,0,0,1);}
+
+	out_color = color_sum / SPP;
 }

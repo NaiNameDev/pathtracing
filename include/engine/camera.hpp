@@ -14,6 +14,8 @@ public:
 	glm::vec3 rotation;
 	glm::vec3 forward;
 
+	glm::vec2 old_mouse_pos;
+
 	Camera();
 
 	glm::vec3 get_look_dir();
