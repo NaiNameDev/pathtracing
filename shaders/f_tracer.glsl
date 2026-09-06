@@ -28,7 +28,7 @@ vec3 trace(vec3 origin, vec3 dir, int seed) {
 	vec3 color_sum = pnc[0];
 
 	for (int i = 0; i < MAX_DEPTH; i++) {
-		pnc = get_dir_pnc(pnc[2], random_reflection(pnc[1], seed + i));
+		pnc = get_hit_point_noraml_color(pnc[2], random_reflection(pnc[1], seed + i));
 		color_sum *= pnc[0];
 	}
 
@@ -50,8 +50,8 @@ void main() {
 
 	vec3 color_sum = vec3(0.0);
 	for (int i = 0; i < SPP; i++) {
-		color_sum += trace(camera_pos, ray_dir, i + int(u_time));
+		color_sum += trace(camera_pos, ray_dir, i + int(time));
 	}
 
-	out_color = color_sum / SPP;
+	out_color = vec4(color_sum / SPP, 1.0);
 }
