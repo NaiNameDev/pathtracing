@@ -1,5 +1,30 @@
 #version 460 core
 
+struct triangle {
+	vec3 p1;
+	vec3 p2;
+	vec3 p3;
+	vec3 normal;
+	uint material_id;
+};
+struct material {
+	vec3 albedo;
+	float roughness;
+	float metallic;
+};
+
+layout(std430, binding = 0) readonly buffer triangle_buffer {
+	triangle triangles[];
+};
+
+layout(std430, binding = 1) readonly buffer material_buffer {
+	material materials[];
+};
+
+layout(std430, binding = 2) readonly buffer model_matrix_buffer {
+	mat4 models[];
+};
+
 #define MAX_DEPTH 4
 #define SPP 12
 
@@ -15,24 +40,56 @@ uniform float far;
 uniform vec3 camera_pos;
 uniform vec3 camera_look_dir;
 
-vec3 random_reflection(vec3 normal, int seed) {
-	return vec3(1.0);
+bool is_inside_trg(vec3 point, vec3 A, vec3 B, vec3 C) {
+    vec3 v0 = C - A;
+    vec3 v1 = B - A;
+    vec3 v2 = point - A;
+
+	float d00 = dot(v0, v0);
+    float d01 = dot(v0, v1);
+    float d02 = dot(v0, v2);
+    float d11 = dot(v1, v1);
+    float d12 = dot(v1, v2);
+	
+	float base_den = d00 * d11 - d01 * d01;
+	if (abs(base_den) < 1e-8) return false;
+
+	float den = 1.0f / base_den;
+	float v = (d11 * d02 - d01 * d12) * den;
+	float w = (d00 * d12 - d01 * d02) * den;
+	float u = 1.0f - v - w;	
+	
+	return v >= 0.0f && w >= 0.0f && u >= 0.0f;
 }
 
-mat3 get_hit_point_noraml_color(vec3 origin, vec3 dir) {
-	return mat3(1.0);
+vec3 get_sky_color(vec3 ray_dir) {
+	return vec3((dot(ray_dir, vec3(0, 1, 0)) + 1) / 2, 0.5, 0.5);
 }
 
-vec3 trace(vec3 origin, vec3 dir, int seed) {
-	mat3 pnc = get_hit_point_noraml_color(origin, dir);
-	vec3 color_sum = pnc[0];
+vec3 test_trace(vec3 ro, vec3 rd) {
+	float closest_t = 1e20;
+    int hit_idx = -1;
 
-	for (int i = 0; i < MAX_DEPTH; i++) {
-		pnc = get_hit_point_noraml_color(pnc[2], random_reflection(pnc[1], seed + i));
-		color_sum *= pnc[0];
-	}
+    for (int i = 0; i < triangles.length(); i++) {
+		float denom = dot(rd, triangles[i].normal);
+        if (abs(denom) < 1e-6) continue; 
 
-	return color_sum;
+        float t = dot(triangles[i].p1 - ro, triangles[i].normal) / denom;
+        if (t < 0.0f || t >= closest_t) continue; 
+        
+		vec3 plane_point = ro + rd * t;
+
+        if (is_inside_trg(plane_point, triangles[i].p1, triangles[i].p2, triangles[i].p3)) {
+            closest_t = t;
+            hit_idx = i;
+        }
+    }
+
+    if (hit_idx != -1) {
+        return materials[triangles[hit_idx].material_id].albedo;
+    }
+
+    return get_sky_color(rd); 
 }
 
 void main() {
@@ -48,10 +105,5 @@ void main() {
 	
 	vec3 ray_dir = normalize(right * pix.x * fov_half_tan + up * pix.y * fov_half_tan + nlook_dir);
 
-	vec3 color_sum = vec3(0.0);
-	for (int i = 0; i < SPP; i++) {
-		color_sum += trace(camera_pos, ray_dir, i + int(time));
-	}
-
-	out_color = vec4(color_sum / SPP, 1.0);
+	out_color = vec4(test_trace(camera_pos + vec3(0, 0, 4), ray_dir), 1.0f);
 }

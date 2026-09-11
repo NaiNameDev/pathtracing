@@ -6,6 +6,7 @@
 #include <engine/signal.hpp>
 #include <engine/shader.hpp>
 #include <engine/camera.hpp>
+#include <engine/mesh.hpp>
 
 Engine engine(1280, 720, "sigma clouds");
 Camera main_camera;
@@ -48,11 +49,22 @@ void on_ready() {
 	main_shader.set_uniform("near", 0.1f);
 	main_shader.set_uniform("far", 100.0f);
 	main_shader.set_uniform("fov", 90.0f);
+
+	Mesh test;
+	brdf_material mat = (brdf_material){glm::vec3(0.0f, 0.2f, 0.5f), 0.5f, 0.5f};
+	test.material = mat;
+	test.load_from_obj("./test/obj/sphere.obj");
+	
+	std::vector<Mesh*> set;
+	set.push_back(&test);
+	
+	ssbo_from_mesh_set(set);
 }
 void process(float delta) {
 	main_shader.set_uniform("time", (float)glfwGetTime());
-	
-	main_shader.set_uniform("camera_pos", glm::vec3());
+	main_camera.camera_controll(delta, engine.main_window);
+
+	main_shader.set_uniform("camera_pos", main_camera.position);
 	main_shader.set_uniform("camera_look_dir", main_camera.get_look_dir());
 
 	glBindVertexArray(VAO);	
