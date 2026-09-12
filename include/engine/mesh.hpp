@@ -15,11 +15,11 @@ struct triangle {
 	glm::vec3 normal;
 };
 struct gpu_triangle {
-	glm::vec3 p1;
-	glm::vec3 p2;
-	glm::vec3 p3;
-	glm::vec3 normal;
-	unsigned int material_id;
+	glm::vec4 p1;
+	glm::vec4 p2;
+	glm::vec4 p3;
+	glm::vec4 normal;
+	glm::uvec4 material_id;
 };
 
 struct brdf_material {

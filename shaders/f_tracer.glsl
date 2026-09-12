@@ -1,12 +1,13 @@
 #version 460 core
 
 struct triangle {
-	vec3 p1;
-	vec3 p2;
-	vec3 p3;
-	vec3 normal;
-	uint material_id;
+    vec4 p1;
+    vec4 p2;
+    vec4 p3;
+    vec4 normal;
+    uvec4 material_id;
 };
+
 struct material {
 	vec3 albedo;
 	float roughness;
@@ -71,22 +72,22 @@ vec3 test_trace(vec3 ro, vec3 rd) {
     int hit_idx = -1;
 
     for (int i = 0; i < triangles.length(); i++) {
-		float denom = dot(rd, triangles[i].normal);
+		float denom = dot(rd, vec3(triangles[i].normal));
         if (abs(denom) < 1e-6) continue; 
 
-        float t = dot(triangles[i].p1 - ro, triangles[i].normal) / denom;
+        float t = dot(vec3(triangles[i].p1) - ro, vec3(triangles[i].normal)) / denom;
         if (t < 0.0f || t >= closest_t) continue; 
         
 		vec3 plane_point = ro + rd * t;
 
-        if (is_inside_trg(plane_point, triangles[i].p1, triangles[i].p2, triangles[i].p3)) {
+        if (is_inside_trg(plane_point, vec3(triangles[i].p1), vec3(triangles[i].p2), vec3(triangles[i].p3))) {
             closest_t = t;
             hit_idx = i;
         }
     }
 
     if (hit_idx != -1) {
-        return materials[triangles[hit_idx].material_id].albedo;
+        return materials[triangles[hit_idx].material_id.x].albedo * (dot(vec3(triangles[hit_idx].normal), vec3(0, 0, 1) + 1) * 0.5);
     }
 
     return get_sky_color(rd); 

@@ -7,10 +7,10 @@ void ssbo_from_mesh_set(std::vector<Mesh*>& scene) {
 	
 	for (unsigned int i = 0; i < scene.size(); i++) {
 		for (unsigned int j = 0; j < scene[i]->triangles.size(); j++) {
-			combined_triangle_buffer.push_back((gpu_triangle){scene[i]->triangles[j].points[0],
-															  scene[i]->triangles[j].points[1],
-															  scene[i]->triangles[j].points[2],
-															  scene[i]->triangles[j].normal, i});
+			combined_triangle_buffer.push_back((gpu_triangle){glm::vec4(scene[i]->triangles[j].points[0], 1.0f),
+															  glm::vec4(scene[i]->triangles[j].points[1], 1.0f),
+															  glm::vec4(scene[i]->triangles[j].points[2], 1.0f),
+															  glm::vec4(scene[i]->triangles[j].normal, 1.0f), glm::uvec4(i, 0, 0, 0)});
 		}
 		combined_material_buffer.push_back(scene[i]->material);
 		combined_model_buffer.push_back(scene[i]->get_model());
@@ -65,7 +65,7 @@ void Mesh::load_from_obj(std::string path) {
 	t.seekg(0);
 	t.read(&file[0], size); 
 
-	int triangle_idx = 0;
+	int triangle_idx = -1;
 	triangle tmp_trg;
 
 	for(int i = 0; i < file.length(); i++) {
